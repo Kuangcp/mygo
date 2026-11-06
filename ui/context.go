@@ -722,7 +722,10 @@ type state struct {
 	// accessDisabled, that assistive technology reads it as unavailable
 	// (AccessDisabled).
 	ignoreInput, accessHidden, accessDisabled bool
-	cursor                                    Cursor
+	// activeDescendant is the element that has the keyboard focus while
+	// this one does (ActiveDescendant), 0 for none.
+	activeDescendant uint64
+	cursor           Cursor
 	// tip marks an element with a tooltip (TooltipBase), which shows once
 	// the pointer has rested on it for tipDelay, or at once within tipWarm
 	// of another going: its theme's TooltipDelay.
@@ -735,6 +738,13 @@ type state struct {
 	// paints into the layer at once rather than flat first (checkFlat).
 	effectLayer *Canvas
 	grouped     bool
+	// ink is what the element and those inside it painted into its layer
+	// in frame inkFrame, in its own space, and lastInk what they painted
+	// in a frame before (keepInk): the layer of a frame holds lastInk, as
+	// far as a blur or a shadow inside it reached, the same however many
+	// times the frame paints.
+	ink, lastInk Rect
+	inkFrame     uint64
 	// webView is the web view the element shows (WebView).
 	webView NativeWebView
 
