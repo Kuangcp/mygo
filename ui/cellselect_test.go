@@ -479,3 +479,51 @@ func TestOutlineTableCellSelectKeys(t *testing.T) {
 		t.Fatalf("Left: open %v, cells %+v", s.Open.Has("src"), s.List.Cells)
 	}
 }
+
+// CellsStyle paints the block's cells, the rest of the rows chosen, and
+// every other row in colors of its own: the spreadsheet's two levels and
+// stripes.
+func TestCellsStyleTwoLevelAndStripes(t *testing.T) {
+	s := &ListState{CellSelect: true}
+	sel := &Selection[int]{}
+	s.Selection = sel
+	var theme *Theme
+	var style CellsStyle
+	rowNode := map[int]*node{}
+	cellNode := map[[2]int]*node{}
+	cols := []TableColumn{{Title: "#", RowHeader: true, Width: 40, Fixed: true}, {Title: "A"}, {Title: "B"}}
+	tt := NewTester(func(c *Context) {
+		theme = c.Theme()
+		style = CellsStyle{
+			Cell:     theme.Accent,
+			CellText: theme.AccentText,
+			Row:      theme.Text.Alpha(0.12),
+			Stripe:   theme.Text.Alpha(0.04),
+		}
+		s.CellsStyle = style
+		Table(c, s, cols, 4, func(row, col int) {
+			cell := Textf(c, "r%dc%d", row, col).node().parent
+			cellNode[[2]int{row, col}] = cell
+			rowNode[row] = cell.parent.parent // the list's row, under the table's
+		}).Grow(1)
+	}, 400, 300)
+	tt.Frame()
+	tt.Click("r1c1")
+	tt.Frame()
+	wantBlock(t, s, sel, "click r1c1", []int{1}, ColumnRange{Cursor: "A", Anchor: "A"}, []string{"A"})
+	if cell := cellNode[[2]int{1, 1}]; cell.bg != style.Cell || cell.ts.color != style.CellText {
+		t.Fatalf("chosen cell: bg %v text %v", cell.bg, cell.ts.color)
+	}
+	if other := cellNode[[2]int{1, 2}]; other.bg != Transparent {
+		t.Fatalf("an unchosen cell of the row is painted over the row: %v", other.bg)
+	}
+	if row := rowNode[1]; row.bg != style.Row {
+		t.Fatalf("chosen row: %v want %v", row.bg, style.Row)
+	}
+	if row := rowNode[0]; row.bg != Transparent {
+		t.Fatalf("even row painted: %v", row.bg)
+	}
+	if row := rowNode[3]; row.bg != style.Stripe {
+		t.Fatalf("striped row: %v want %v", row.bg, style.Stripe)
+	}
+}

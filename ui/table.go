@@ -240,18 +240,31 @@ func table(c *context, s *ListState, columns []TableColumn, n int, cell func(row
 				// header with its whole row; the Cursor's, in the row the
 				// keys move from, has a border while the table has the
 				// focus. A cell holding the focus, as an editor in it, shows
-				// what it holds.
+				// what it holds. CellsStyle paints the block in its own
+				// colors instead.
 				on := c.row.chosen && k >= lo && k <= hi && (!col.RowHeader || s.Cells.All)
 				at := k == cur && *s.cursor() == c.row.i
 				box.checked = 1 + int8(b2f(on))
+				style := s.CellsStyle
+				bg, fg := c.accent(t), t.AccentText
+				if style.Cell != Transparent {
+					bg = style.Cell
+				}
+				if style.CellText != Transparent {
+					fg = style.CellText
+				}
+				border := fg
+				if style.Cell == Transparent {
+					border = t.Accent
+				}
 				switch {
 				case !on && !at, box.FocusWithin():
 				case on && at:
-					box.Background(c.accent(t)).TextColor(t.AccentText).DrawOver(cursorBorder(table, t.AccentText))
+					box.Background(bg).TextColor(fg).DrawOver(cursorBorder(table, border))
 				case on:
-					box.Background(c.accent(t)).TextColor(t.AccentText)
+					box.Background(bg).TextColor(fg)
 				case at:
-					box.DrawOver(cursorBorder(table, t.Accent))
+					box.DrawOver(cursorBorder(table, border))
 				}
 			}
 			if drag.fit != "" && drag.fit == col.id() {
