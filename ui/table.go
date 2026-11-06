@@ -253,17 +253,20 @@ func table(c *context, s *ListState, columns []TableColumn, n int, cell func(row
 				if style.CellText != Transparent {
 					fg = style.CellText
 				}
-				border := fg
-				if style.Cell == Transparent {
-					border = t.Accent
-				}
 				switch {
 				case !on && !at, box.FocusWithin():
 				case on && at:
-					box.Background(bg).TextColor(fg).DrawOver(cursorBorder(table, border))
+					// The border in the text's color, on the cell's own.
+					box.Background(bg).TextColor(fg).DrawOver(cursorBorder(table, fg))
 				case on:
 					box.Background(bg).TextColor(fg)
 				case at:
+					// The border in the block's own color, the accent
+					// without one.
+					border := style.Cell
+					if border == Transparent {
+						border = t.Accent
+					}
 					box.DrawOver(cursorBorder(table, border))
 				}
 			}

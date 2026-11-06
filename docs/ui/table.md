@@ -78,7 +78,9 @@ the block follows it.
 `CellsStyle` paints the block in colors of its own rather than the accent,
 as a spreadsheet's two levels and stripes: `Cell` fills the block's cells,
 `CellText` colors their text, `Row` fills the rest of the rows chosen, and
-`Stripe` fills every other row. A zero color paints none.
+`Stripe` fills every other row. A zero color paints none. The cursor's
+border takes `CellText` in the block and `Cell` out of it, or the accent
+and its text where those are zero.
 
 ```go
 t := c.Theme()

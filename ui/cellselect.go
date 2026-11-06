@@ -15,9 +15,11 @@ package ui
 // A zero color paints none, leaving the theme's background, except where
 // Cell is zero: the block then shows as chosen rows do, in the accent.
 type CellsStyle struct {
-	// Cell is the background of the cells of the block.
+	// Cell is the background of the cells of the block, and the border of
+	// the cursor where it is out of the block.
 	Cell Color
-	// CellText is the color of their text, as AccentText is of chosen rows.
+	// CellText is the color of their text and of the cursor's border in
+	// the block, as AccentText is of chosen rows.
 	CellText Color
 	// Row is the background of the rows chosen.
 	Row Color
